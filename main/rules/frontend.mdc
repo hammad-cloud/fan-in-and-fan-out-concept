@@ -1,0 +1,13 @@
+---
+description: Next.js frontend conventions
+globs: frontend/**/*.{ts,tsx,js,jsx,css}
+alwaysApply: false
+---
+
+# Frontend (`frontend/`)
+
+- Next.js App Router under `src/app/`. Use TypeScript strict mode.
+- Import via `@/` path alias for `src/*`.
+- Call the API with `NEXT_PUBLIC_API_BASE_URL`; never hardcode production hosts.
+- Keep UI minimal until product pages are requested. No premature design system.
+- Prefer Server Components by default; add client components only when interactivity requires it.

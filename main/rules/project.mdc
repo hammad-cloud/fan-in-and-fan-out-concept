@@ -1,0 +1,13 @@
+---
+description: Core conventions for the Price Comparison PK monorepo
+alwaysApply: true
+---
+
+# Project conventions
+
+- Monorepo packages: `frontend/`, `backend/`, `workers/`. Do not mix concerns across packages.
+- Pakistan market product: prefer PKR and local retailer context when adding domain features.
+- Keep changes minimal and production-oriented. No drive-by refactors.
+- Secrets belong in `.env` only; update `.env.example` with new keys (no real values).
+- Do not implement scraping, auth, ORM models, or product UI unless the user explicitly asks.
+- Prefer `/api/v1` for new HTTP endpoints. Document run commands in package READMEs when adding services.

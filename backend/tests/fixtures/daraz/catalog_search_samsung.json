@@ -1,0 +1,69 @@
+{
+  "mods": {
+    "listItems": [
+      {
+        "name": "Samsung Galaxy A07 4GB+128GB - PTA APPROVED",
+        "itemUrl": "//www.daraz.pk/products/samsung-galaxy-a07-4gb128gb-pta-approved-i924759919.html",
+        "image": "https://static-01.daraz.pk/p/b6d2e06f17652fcb1dea2375cdd680a6.jpg",
+        "price": "41999",
+        "originalPrice": "52500",
+        "priceShow": "Rs. 41,999",
+        "brandName": "Samsung",
+        "sku": "924759919_PK",
+        "skuId": "3981952080",
+        "itemId": "924759919",
+        "nid": "924759919",
+        "inStock": true,
+        "categories": [
+          2,
+          3
+        ],
+        "sellerName": "Samsung Flagship Store",
+        "cheapest_sku": "924759919_PK-3981952080"
+      },
+      {
+        "name": "Samsung Galaxy A07 4GB+64GB - PTA APPROVED",
+        "itemUrl": "//www.daraz.pk/products/samsung-galaxy-a07-4gb64gb-pta-approved-i924758885.html",
+        "image": "https://static-01.daraz.pk/p/7c9eaf0c192a7596114f609c123cd21a.jpg",
+        "price": "34899",
+        "originalPrice": "42999",
+        "priceShow": "Rs. 34,899",
+        "brandName": "Samsung",
+        "sku": "924758885_PK",
+        "skuId": "3981951158",
+        "itemId": "924758885",
+        "nid": "924758885",
+        "inStock": true,
+        "categories": [
+          2,
+          3
+        ],
+        "sellerName": "Samsung Flagship Store",
+        "cheapest_sku": "924758885_PK-3981951158"
+      },
+      {
+        "name": "Samsung Galaxy A07 6GB+128GB PTA APPROVED",
+        "itemUrl": "//www.daraz.pk/products/samsung-galaxy-a07-6gb128gb-pta-approved-i924786211.html",
+        "image": "https://static-01.daraz.pk/p/65a63f02f0f512219433d8fb24479baf.jpg",
+        "price": "49999",
+        "originalPrice": "62500",
+        "priceShow": "Rs. 49,999",
+        "brandName": "Samsung",
+        "sku": "924786211_PK",
+        "skuId": "3981936802",
+        "itemId": "924786211",
+        "nid": "924786211",
+        "inStock": true,
+        "categories": [
+          2,
+          3
+        ],
+        "sellerName": "Samsung Flagship Store",
+        "cheapest_sku": "924786211_PK-3981936802"
+      }
+    ]
+  },
+  "mainInfo": {
+    "pageSize": "40"
+  }
+}

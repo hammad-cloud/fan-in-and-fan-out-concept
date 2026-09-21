@@ -1,0 +1,13 @@
+---
+description: FastAPI backend and workers conventions
+globs: backend/**/*.py,workers/**/*.py
+alwaysApply: false
+---
+
+# Backend & workers
+
+- FastAPI app factory in `backend/app/main.py`; routes under `app/api/v1/`.
+- Load config via `app.core.config.Settings` / `get_settings()` — do not read `os.environ` ad hoc.
+- Keep endpoints thin; introduce services/repositories only when domain logic exists.
+- `workers/` is Redis job scaffolding only until queues are explicitly implemented.
+- Pin dependencies in `requirements.txt`. Match Python 3.12+ for local and CI.
