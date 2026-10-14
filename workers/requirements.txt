@@ -1,2 +1,0 @@
-# Workers stay dormant until Redis-backed job processing is introduced.
-# Pin the same Python minor version as backend when implementing.

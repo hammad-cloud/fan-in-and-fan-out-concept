@@ -1,0 +1,11 @@
+{
+  "name": "fan-in-and-fan-out",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  },
+  "license": "MIT"
+}

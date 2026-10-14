@@ -1,56 +1,21 @@
-# Environment
+# Dependencies and build output
+node_modules
+dist
+
+# Secrets and local environment (Vercel CLI writes a deploy token to .env.local)
 .env
-.env.local
-.env.*.local
+.env*
 !.env.example
 
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-.eggs/
-dist/
-build/
-.venv/
-venv/
-env/
+# Hosting CLI link folders
+.vercel
 
-# Next.js
-frontend/.next/
-frontend/out/
-
-# Testing / coverage
-coverage/
-.coverage
-htmlcov/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.tox/
-
-# IDE / OS
-.idea/
-.vscode/
-*.swp
+# Logs and OS/editor files
+*.log
+npm-debug.log*
 .DS_Store
 Thumbs.db
+.idea
 
-# Logs & runtime
-*.log
-logs/
-*.pid
-tmp/
-temp/
-
-# Docker volumes (local)
-pgdata/
-redisdata/
-
-# Build artifacts
-*.egg
-.Python
-pip-wheel-metadata/
+# Local AI-assistant tool settings
+.claude

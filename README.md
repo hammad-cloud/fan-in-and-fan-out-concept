@@ -1,75 +1,36 @@
-# Price Comparison PK
+# SastaScan
 
-Pakistani price comparison platform — monorepo foundation.
+**Live site: https://sastascan-pk.vercel.app**
 
-| Layer | Stack |
-| --- | --- |
-| Frontend | Next.js + TypeScript |
-| Backend API | Python + FastAPI |
-| Database | PostgreSQL |
-| Jobs / cache | Redis (workers later) |
+Price comparison for Pakistani online stores. One search is sent to 41 stores in parallel (fan-out), and the results are merged into one list sorted by price (fan-in).
 
-## Repository layout
+## Project layout
 
+- `frontend/` – React + Vite site
+- `backend/` – store adapters (`stores.js`), shared search logic (`search.js`), relevance filter, and a local Express server
+- `api/` – Vercel serverless functions that reuse `backend/search.js`
+
+## Run locally
+
+```bash
+npm install                     # root (dev runner)
+npm --prefix backend install
+npm --prefix frontend install
+npm run dev                     # backend on :5000, frontend on :5173 (proxies /api)
 ```
-frontend/     Next.js app (App Router)
-backend/      FastAPI application
-workers/      Background job workers (scaffold only)
-docs/         Architecture and setup notes
-scripts/      Local developer utilities
-.cursor/      Cursor project rules
-```
 
-## Prerequisites
+Run the backend tests with `npm --prefix backend test`.
 
-- Node.js 20+
-- Python 3.12+
-- Docker Desktop (PostgreSQL + Redis)
+## Deploy
 
-## Quick start
+The project deploys to Vercel as-is (`vercel.json`): `vercel deploy --prod`.
 
-1. **Environment**
+## Notes
 
-   ```bash
-   cp .env.example .env
-   ```
+- No API keys or secrets are needed. Never commit `.env*` files.
+- Search is limited to 10 new searches per visitor per minute, and results are cached for 30 minutes.
+- Store data comes from each store's public search pages, which can change or block requests at any time. Check each store's terms of use before running this publicly. Prices shown may be out of date; always confirm on the store's website.
 
-2. **Infrastructure**
+## License
 
-   ```bash
-   docker compose up -d
-   ```
-
-3. **Backend**
-
-   ```bash
-   cd backend
-   python -m venv .venv
-   # Windows: .venv\Scripts\activate
-   # macOS/Linux: source .venv/bin/activate
-   pip install -r requirements.txt
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-4. **Frontend**
-
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-| Service | URL |
-| --- | --- |
-| Frontend | http://localhost:3000 |
-| API docs | http://localhost:8000/docs |
-| Health | http://localhost:8000/api/v1/health |
-
-## Current scope
-
-This commit is **structure and configuration only**. Scraping, models, auth, product UI, and business logic are intentionally out of scope.
-
-## Further reading
-
-- [Getting started](docs/getting-started.md)
-- [Architecture](docs/architecture.md)
+[MIT](LICENSE) © 2026 Muhammad Hammad
