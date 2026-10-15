@@ -2,7 +2,7 @@
 
 **Live site: https://sastascan-pk.vercel.app**
 
-Price comparison for Pakistani online stores. One search is sent to 41 stores in parallel (fan-out), and the results are merged into one list sorted by price (fan-in).
+Price comparison for Pakistani online stores. One search is sent to 44 stores in parallel (fan-out), and the results are merged into one list sorted by price (fan-in).
 
 ## Project layout
 

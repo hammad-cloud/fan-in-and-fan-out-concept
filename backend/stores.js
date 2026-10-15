@@ -202,6 +202,9 @@ const stores = [
   shopify('sanasafinaz', 'Sana Safinaz', 'https://www.sanasafinaz.com'),
   { id: 'dvago', name: 'Dvago', site: 'https://www.dvago.pk', search: dvagoSearch },
   magento('shophive', 'Shophive', 'https://www.shophive.com'),
+  shopify('audionic', 'Audionic', 'https://audionic.co'),
+  shopify('ronin', 'Ronin', 'https://ronin.pk'),
+  shopify('zerolifestyle', 'Zero Lifestyle', 'https://zerolifestyle.co'),
   // Fashion
   shopify('alkaram', 'Alkaram', 'https://alkaramstudio.com'),
   shopify('limelight', 'Limelight', 'https://limelight.pk'),
@@ -253,7 +256,7 @@ const stores = [
 
 // Category shown in the store directory on the homepage.
 const CATEGORY = {
-  'Marketplaces & Electronics': ['daraz', 'priceoye', 'telemart', 'shophive'],
+  'Marketplaces & Electronics': ['daraz', 'priceoye', 'telemart', 'shophive', 'audionic', 'ronin', 'zerolifestyle'],
   'Grocery & Supermarkets': ['alfatah', 'naheed'],
   Fashion: [
     'khaadi', 'sapphire', 'gulahmed', 'mariab', 'sanasafinaz', 'junaidjamshed', 'alkaram', 'limelight', 'bonanza',
