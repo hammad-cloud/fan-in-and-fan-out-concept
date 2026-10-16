@@ -4,8 +4,8 @@
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36';
 
-async function get(url, signal, headers = {}) {
-  const res = await fetch(url, { signal, headers: { 'User-Agent': UA, ...headers } });
+async function get(url, signal, headers = {}, init = {}) {
+  const res = await fetch(url, { ...init, signal, headers: { 'User-Agent': UA, ...headers } });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res;
 }
@@ -121,6 +121,52 @@ async function dvagoSearch(q, signal) {
   });
 }
 
+// Springs (grocery) is Shopify behind a gate that 302s every page until a branch is saved in the session.
+// shortcut: picks DHA Karachi with free_delivery (the only type open round the clock), so prices are that branch's; make the branch a setting if users need others.
+async function springsSearch(q, signal) {
+  const origin = 'https://springs.com.pk';
+  const jar = {};
+  const keep = (res) => {
+    for (const c of res.headers.getSetCookie()) {
+      const kv = c.split(';')[0];
+      jar[kv.slice(0, kv.indexOf('='))] = kv.slice(kv.indexOf('=') + 1);
+    }
+    return res;
+  };
+  const cookie = () => Object.entries(jar).map(([k, v]) => `${k}=${v}`).join('; ');
+
+  const gate = await (keep(await get(`${origin}/select-branch`, signal))).text();
+  const csrf = gate.match(/data-csrf="([^"]+)"/)?.[1];
+  if (!csrf) throw new Error('branch gate changed');
+  keep(
+    await get(`${origin}/select-branch/location`, signal, {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'X-CSRF-TOKEN': csrf,
+      Cookie: cookie(),
+    }, { method: 'POST', body: JSON.stringify({ lat: 24.8138, lng: 67.064, branch: 'dha', delivery_type: 'free_delivery' }) })
+  );
+
+  // manual: a lost session 302s back to the gate, which should fail loudly, not look like zero results
+  const html = await (await get(`${origin}/search?q=${encodeURIComponent(q)}`, signal, { Cookie: cookie() }, { redirect: 'manual' })).text();
+  const text = (s) => decode((s ?? '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim());
+  return html
+    .split('class="product-card"')
+    .slice(1)
+    .map((card) => {
+      const price = num(card.match(/data-card-price="([\d.]+)"/)?.[1]);
+      const compare = num(text(card.match(/class="product-card__compare">([\s\S]*?)<\/span>/)?.[1]));
+      return {
+        title: decode(card.match(/data-card-title="([^"]*)"/)?.[1] ?? ''),
+        price,
+        originalPrice: compare && compare > price ? compare : null,
+        image: card.match(/<img[^>]*?\ssrc="([^"]+)"/)?.[1],
+        url: card.match(/href="([^"]+)"/)?.[1],
+        available: null, // cards carry no stock flag
+      };
+    });
+}
+
 // Magento 2 stores (Shophive) expose the standard GraphQL product search.
 async function magentoSearch(origin, q, signal) {
   const query = `{products(search:${JSON.stringify(q)},pageSize:20){items{name url_key url_suffix stock_status small_image{url} price_range{minimum_price{regular_price{value} final_price{value}}}}}}`;
@@ -201,10 +247,12 @@ const stores = [
   shopify('telemart', 'Telemart', 'https://telemart.pk'),
   shopify('sanasafinaz', 'Sana Safinaz', 'https://www.sanasafinaz.com'),
   { id: 'dvago', name: 'Dvago', site: 'https://www.dvago.pk', search: dvagoSearch },
+  { id: 'springs', name: 'Springs', site: 'https://springs.com.pk', search: springsSearch },
   magento('shophive', 'Shophive', 'https://www.shophive.com'),
   shopify('audionic', 'Audionic', 'https://audionic.co'),
   shopify('ronin', 'Ronin', 'https://ronin.pk'),
   shopify('zerolifestyle', 'Zero Lifestyle', 'https://zerolifestyle.co'),
+  shopify('conatural', 'Conatural', 'https://conaturalintl.com'),
   // Fashion
   shopify('alkaram', 'Alkaram', 'https://alkaramstudio.com'),
   shopify('limelight', 'Limelight', 'https://limelight.pk'),
@@ -257,14 +305,14 @@ const stores = [
 // Category shown in the store directory on the homepage.
 const CATEGORY = {
   'Marketplaces & Electronics': ['daraz', 'priceoye', 'telemart', 'shophive', 'audionic', 'ronin', 'zerolifestyle'],
-  'Grocery & Supermarkets': ['alfatah', 'naheed'],
+  'Grocery & Supermarkets': ['alfatah', 'naheed', 'springs'],
   Fashion: [
     'khaadi', 'sapphire', 'gulahmed', 'mariab', 'sanasafinaz', 'junaidjamshed', 'alkaram', 'limelight', 'bonanza',
     'beechtree', 'generation', 'edenrobe', 'crossstitch', 'zellbury', 'ethnic', 'saya', 'almirah', 'outfitters',
     'cambridge', 'diners', 'breakout', 'laam',
   ],
   'Footwear & Bags': ['bata', 'servis', 'ndure', 'borjan', 'hushpuppies', 'stylo', 'bagallery'],
-  'Beauty & Pharmacy': ['jenpharm', 'highfy', 'dvago'],
+  'Beauty & Pharmacy': ['jenpharm', 'highfy', 'dvago', 'conatural'],
   'Home & Furniture': ['chenone', 'interwood', 'habitt'],
 };
 for (const [category, ids] of Object.entries(CATEGORY)) {
