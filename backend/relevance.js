@@ -20,4 +20,20 @@ const ACCESSORY = /\b(cables?|chargers?|cases?|covers?|protectors?|tempered|stic
 // Not an accessory if the user asked for one ("iphone case").
 const isAccessory = (title, query) => ACCESSORY.test(normalize(title)) && !ACCESSORY.test(normalize(query));
 
-module.exports = { matchesQuery, isAccessory };
+// Used to skip stores that can't carry the item: no point asking Khaadi for an iPhone.
+// shortcut: fixed word lists; unlisted words (or both kinds in one query) fall back to querying every store.
+const ELECTRONICS = /\b(phones?|iphones?|mobiles?|samsung|xiaomi|redmi|infinix|tecno|oppo|vivo|realme|laptops?|macbook|tablets?|ipad|earbuds?|airpods|headphones?|tvs?|monitors?|power ?banks?|speakers?|cameras?)\b/;
+const CLOTHING = /\b(kurtas?|kurtis?|shirts?|t ?shirts?|lawn|suits?|dress(es)?|jeans|trousers?|shalwar|kameez|dupattas?|abayas?|jackets?|hoodies?|polos?|sarees?|unstitched|shawls?)\b/;
+
+// Fashion stores carry laptop bags, phone pouches and watches, so those queries go to every store (npm run audit:routing).
+const CARRIED_BY_BOTH = /\b(bags?|pouch(es)?|sleeves?|watch(es)?)\b/;
+
+function queryKind(query) {
+  const q = normalize(query);
+  if (ACCESSORY.test(q) || CARRIED_BY_BOTH.test(q)) return null;
+  const e = ELECTRONICS.test(q);
+  const c = CLOTHING.test(q);
+  return e === c ? null : e ? 'electronics' : 'clothing';
+}
+
+module.exports = { matchesQuery, isAccessory, queryKind };

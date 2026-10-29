@@ -1,9 +1,10 @@
 // Shared by the local Express server (server.js) and the Vercel functions (api/*.js).
 const { stores } = require('./stores');
-const { matchesQuery, isAccessory } = require('./relevance');
+const { matchesQuery, isAccessory, queryKind } = require('./relevance');
 
 const STORE_TIMEOUT_MS = 7000; // keeps a search well under serverless time limits
 const CACHE_MS = 30 * 60 * 1000; // long, because every uncached search sends ~40 store requests
+const GENERAL = ['daraz', 'telemart']; // marketplaces that stock clothing and electronics alike
 const cache = new Map(); // query -> { at, body }; keeps us from hammering the stores (Al-Fatah rate-limits)
 
 // Links and images come from 41 outside sites; only pass on real web URLs (blocks javascript:, data:, etc.).
@@ -37,6 +38,12 @@ function allowSearch(ip) {
 const listStores = () =>
   stores.map(({ id, name, site, category }) => ({ id, name, site, category: category ?? 'Other' }));
 
+// Route: skip the category that can't carry this kind of item. General marketplaces sell everything, so always ask them.
+function routeStores(q) {
+  const skip = { electronics: 'Fashion', clothing: 'Marketplaces & Electronics' }[queryKind(q)];
+  return stores.filter((s) => !skip || s.category !== skip || GENERAL.includes(s.id));
+}
+
 // Returns { status, body } so each host can send it its own way.
 async function searchAll(rawQuery, ip = 'unknown') {
   const q = String(rawQuery ?? '').trim().slice(0, 100);
@@ -52,9 +59,11 @@ async function searchAll(rawQuery, ip = 'unknown') {
 
   const started = Date.now();
 
-  // Fan-out: query every store at the same time, each with its own timeout.
+  const targets = routeStores(q);
+
+  // Fan-out: query every relevant store at the same time, each with its own timeout.
   const settled = await Promise.allSettled(
-    stores.map(async (store) => {
+    targets.map(async (store) => {
       const t0 = Date.now();
       const items = await store.search(q, AbortSignal.timeout(STORE_TIMEOUT_MS));
       return { store, items, ms: Date.now() - t0 };
@@ -65,7 +74,7 @@ async function searchAll(rawQuery, ip = 'unknown') {
   const sources = [];
   const results = [];
   settled.forEach((r, i) => {
-    const store = stores[i];
+    const store = targets[i];
     if (r.status === 'fulfilled') {
       const items = r.value.items
         .map((it) => ({ ...it, url: safeUrl(it.url), image: safeUrl(it.image) }))
@@ -93,4 +102,4 @@ async function searchAll(rawQuery, ip = 'unknown') {
   return { status: 200, body };
 }
 
-module.exports = { listStores, searchAll, safeUrl };
+module.exports = { listStores, searchAll, safeUrl, routeStores };
