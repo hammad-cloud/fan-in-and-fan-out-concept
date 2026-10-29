@@ -1,5 +1,7 @@
 # SastaScan
 
+[![Tests](https://github.com/hammad-cloud/fan-in-and-fan-out-concept/actions/workflows/test.yml/badge.svg)](https://github.com/hammad-cloud/fan-in-and-fan-out-concept/actions/workflows/test.yml)
+
 **Live site: https://sastascan-pk.vercel.app**
 
 Price comparison for Pakistani online stores. One search is sent to 46 stores in parallel (fan-out), and the results are merged into one list sorted by price (fan-in).
