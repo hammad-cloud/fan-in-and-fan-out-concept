@@ -23,6 +23,11 @@ app.get('/api/search', async (req, res) => {
   res.status(status).json(body);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Only listen when run directly, so tests can start the app on a free port.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
