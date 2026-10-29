@@ -32,6 +32,7 @@ const CATEGORIES = [
 const POPULAR = ['deodorant', 'earbuds', 'lawn suit', 'shoes', 'perfume']
 
 const SORTS = {
+  relevance: (a, b) => a.accessory - b.accessory || a.price - b.price, // products before accessories
   'price-asc': (a, b) => a.price - b.price,
   'price-desc': (a, b) => b.price - a.price,
   discount: (a, b) => pctOff(b) - pctOff(a) || a.price - b.price,
@@ -46,7 +47,7 @@ function App() {
   const [notice, setNotice] = useState('')
   const [hidden, setHidden] = useState([]) // store ids switched off in the filter
   const [inStockOnly, setInStockOnly] = useState(false)
-  const [sort, setSort] = useState('price-asc')
+  const [sort, setSort] = useState('relevance')
 
   // Light by default; dark only if the user picked it. Storage can throw (private mode), so guard it.
   const [theme, setTheme] = useState(() => {
@@ -117,12 +118,14 @@ function App() {
   const bestPerStore = useMemo(() => {
     const best = {}
     for (const r of data?.results ?? [])
-      if (r.available !== false && (!best[r.store] || r.price < best[r.store].price)) best[r.store] = r
-    return Object.values(best).sort((a, b) => a.price - b.price)
+      if (r.available !== false && (!best[r.store] || SORTS.relevance(r, best[r.store]) < 0)) best[r.store] = r
+    return Object.values(best).sort(SORTS.relevance)
   }, [data])
 
   const home = !data && !loading
-  const buyable = results.filter((r) => r.available !== false)
+  const inStock = results.filter((r) => r.available !== false)
+  const products = inStock.filter((r) => !r.accessory)
+  const buyable = products.length ? products : inStock // a cable isn't the "lowest price" for an iPhone
   const lowest = buyable.length ? Math.min(...buyable.map((r) => r.price)) : null
   const sequentialMs = data?.sources.reduce((s, x) => s + (x.ms ?? 0), 0) ?? 0
   const failed = data?.sources.filter((s) => !s.ok) ?? []
@@ -305,6 +308,7 @@ function App() {
             <label className="sort">
               Sort by
               <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="relevance">Best match</option>
                 <option value="price-asc">Price: low to high</option>
                 <option value="price-desc">Price: high to low</option>
                 <option value="discount">Biggest discount</option>

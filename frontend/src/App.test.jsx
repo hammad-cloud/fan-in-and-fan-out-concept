@@ -99,3 +99,15 @@ test('a search with no matches says so', async () => {
   await searchFor('zzz')
   screen.getByText('No stores had “zzz”. Try a simpler term.')
 })
+
+test('best match puts accessories after products and never marks one lowest', async () => {
+  const results = [
+    { store: 'daraz', storeName: 'Daraz', title: 'iPhone 15 Cable', price: 300, url: 'https://daraz.pk/c', accessory: true },
+    { store: 'daraz', storeName: 'Daraz', title: 'Apple iPhone 15', price: 250000, url: 'https://daraz.pk/p', accessory: false },
+  ]
+  mockApi({ status: 200, body: { ...RESULTS, query: 'iphone', results } })
+  render(<App />)
+  await searchFor('iphone')
+  expect(cardTitles()).toEqual(['Apple iPhone 15', 'iPhone 15 Cable'])
+  expect(screen.getByText('Lowest price').closest('a').getAttribute('href')).toBe('https://daraz.pk/p')
+})
