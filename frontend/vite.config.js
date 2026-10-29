@@ -7,4 +7,8 @@ export default defineConfig({
   server: {
     proxy: { '/api': 'http://localhost:5000' },
   },
+  test: {
+    environment: 'jsdom',
+    globals: true, // lets Testing Library clean up the DOM after each test
+  },
 })
