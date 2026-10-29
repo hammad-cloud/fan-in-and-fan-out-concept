@@ -81,7 +81,7 @@ Tests use fake stores, so they never contact the real store websites. GitHub Act
 
 ## Deploy
 
-The project deploys to Vercel as-is (`vercel.json`): `vercel deploy --prod`. Pushing to GitHub does not deploy; run that command after merging app changes.
+Vercel is connected to this repo: every push to `main` deploys to production, and pull requests get a preview link. Build settings live in `vercel.json`; `vercel deploy --prod` still works for a manual deploy.
 
 ## Notes
 
