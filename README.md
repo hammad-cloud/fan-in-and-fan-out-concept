@@ -20,7 +20,7 @@ Each store request runs in parallel with a 7-second timeout (`Promise.allSettled
 |-------|-------|
 | Frontend | React 19, Vite |
 | Backend | Node.js, Express (local), Vercel serverless functions (production) |
-| Tests | Node test runner (`backend/*.test.js`) |
+| Tests | Node test runner (backend), Vitest + React Testing Library (frontend), GitHub Actions |
 | Hosting | Vercel |
 
 ## Folder structure
@@ -35,14 +35,16 @@ fan-in-and-fan-out-concept/
 │   ├── search.js           # Fan-out / fan-in logic, caching, rate limit
 │   ├── relevance.js        # Drops results that don't match the query
 │   ├── server.js           # Local Express server (port 5000)
-│   └── *.test.js           # Backend tests
+│   └── *.test.js           # Unit, stress, performance, load and security tests
 ├── frontend/
 │   ├── index.html
 │   ├── vite.config.js      # Proxies /api to the backend in development
 │   └── src/
 │       ├── App.jsx
+│       ├── *.test.js(x)    # Frontend tests (Vitest)
 │       ├── components/     # Navbar, SearchBar, ProductCard, PriceSummary, StoreDirectory
 │       └── format.js       # Price formatting
+├── .github/workflows/      # Runs all tests on every push and pull request
 ├── vercel.json             # Vercel build and routing
 └── package.json            # `npm run dev` runs backend + frontend together
 ```
@@ -58,11 +60,26 @@ npm --prefix frontend install
 npm run dev                     # backend on :5000, frontend on :5173 (proxies /api)
 ```
 
-Run the backend tests with `npm --prefix backend test`.
+## Tests
+
+```bash
+npm --prefix backend test       # ~10s: unit, stress, performance, load and security tests
+npm --prefix frontend test      # ~3s: format, component and App tests (Vitest)
+```
+
+| Suite | What it checks |
+|-------|----------------|
+| Stress | Failing and hanging stores, 50k-result payloads, malformed store data, cache bounds |
+| Performance | Stores are searched in parallel, cached searches skip the stores, relevance filter speed |
+| Load | Up to 2000 HTTP requests at 200 concurrent against the Express app |
+| Security | Unsafe links stripped, hostile queries, query length cap, rate limit, security headers |
+| Frontend | Search flow, lowest-price logic, sort and filters, error and empty states |
+
+Tests use fake stores, so they never contact the real store websites. GitHub Actions runs both suites, the frontend lint and the build on every push to `main` and on pull requests.
 
 ## Deploy
 
-The project deploys to Vercel as-is (`vercel.json`): `vercel deploy --prod`.
+The project deploys to Vercel as-is (`vercel.json`): `vercel deploy --prod`. Pushing to GitHub does not deploy; run that command after merging app changes.
 
 ## Notes
 
