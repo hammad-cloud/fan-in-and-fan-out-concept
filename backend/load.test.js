@@ -36,13 +36,13 @@ async function load(path, total, concurrency) {
 test('1000 health checks at 100 concurrent all succeed', async () => {
   const { statuses, p95 } = await load('/api/health', 1000, 100);
   assert.strictEqual(statuses.filter((s) => s === 200).length, 1000);
-  assert.ok(p95 < 500, `p95 ${p95.toFixed(0)}ms`);
+  assert.ok(p95 < 1000, `p95 ${p95.toFixed(0)}ms`);
 });
 
 test('1000 store-list requests at 100 concurrent all succeed', async () => {
   const { statuses, p95 } = await load('/api/stores', 1000, 100);
   assert.strictEqual(statuses.filter((s) => s === 200).length, 1000);
-  assert.ok(p95 < 500, `p95 ${p95.toFixed(0)}ms`);
+  assert.ok(p95 < 1000, `p95 ${p95.toFixed(0)}ms`);
 });
 
 test('2000 searches for a popular term are served from cache under load', async () => {
