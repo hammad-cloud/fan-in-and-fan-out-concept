@@ -1,6 +1,6 @@
 // Shared by the local Express server (server.js) and the Vercel functions (api/*.js).
 const { stores } = require('./stores');
-const { matchesQuery } = require('./relevance');
+const { matchesQuery, isAccessory } = require('./relevance');
 
 const STORE_TIMEOUT_MS = 7000; // keeps a search well under serverless time limits
 const CACHE_MS = 30 * 60 * 1000; // long, because every uncached search sends ~40 store requests
@@ -71,7 +71,9 @@ async function searchAll(rawQuery, ip = 'unknown') {
         .map((it) => ({ ...it, url: safeUrl(it.url), image: safeUrl(it.image) }))
         .filter((it) => it.title && it.price && it.url && matchesQuery(`${it.title} ${it.keywords ?? ''}`, q));
       sources.push({ id: store.id, name: store.name, ok: true, count: items.length, ms: r.value.ms });
-      items.forEach(({ keywords, ...it }) => results.push({ ...it, store: store.id, storeName: store.name }));
+      items.forEach(({ keywords, ...it }) =>
+        results.push({ ...it, accessory: isAccessory(it.title, q), store: store.id, storeName: store.name })
+      );
     } else {
       const msg = r.reason?.message || 'failed';
       // Shopify rate-limits busy server IPs for about a minute (HTTP 429)
@@ -79,7 +81,7 @@ async function searchAll(rawQuery, ip = 'unknown') {
       sources.push({ id: store.id, name: store.name, ok: false, count: 0, error: reason });
     }
   });
-  results.sort((a, b) => a.price - b.price);
+  results.sort((a, b) => a.accessory - b.accessory || a.price - b.price); // products first, then cheapest
 
   const body = { query: q, totalMs: Date.now() - started, sources, results };
   // Don't cache a result where stores were rate-limited, or later visitors keep getting the incomplete list.

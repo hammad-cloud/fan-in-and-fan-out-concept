@@ -13,4 +13,11 @@ function matchesQuery(title, query) {
   });
 }
 
-module.exports = { matchesQuery };
+// "iPhone" also matches cables, cases and stickers; flag those so they rank below the phones.
+// shortcut: fixed word list, misses unlisted accessory words; upgrade to an embedding or LLM classifier if it leaks.
+const ACCESSORY = /\b(cables?|chargers?|cases?|covers?|protectors?|tempered|stickers?|skins?|adapters?|straps?|holders?|stands?|mounts?|pouch(es)?)\b/;
+
+// Not an accessory if the user asked for one ("iphone case").
+const isAccessory = (title, query) => ACCESSORY.test(normalize(title)) && !ACCESSORY.test(normalize(query));
+
+module.exports = { matchesQuery, isAccessory };
